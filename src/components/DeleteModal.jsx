@@ -8,7 +8,6 @@ export const DeleteModal = ({
   setData,
 }) => {
   const handleDelete = () => {
-    // Delete the item from the data array
     setData((prevData) =>
       prevData.filter((item) => item.id !== selectedItem.id)
     );

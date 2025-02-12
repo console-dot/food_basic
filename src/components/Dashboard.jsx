@@ -33,26 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuItem,
-} from "./ui/sidebar";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "./ui/sheet";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
+
 const months = [
   "January",
   "February",
@@ -77,7 +58,8 @@ const getYears = (startYear, endYear) => {
   return years;
 };
 export const Dashboard = () => {
-  const [dateModal, setDateModal] = useState();
+
+  const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [chartData, setChartData] = useState();
   const [selectedPeriod, setSelectedPeriod] = useState("year"); // Default to 'year'
@@ -85,6 +67,8 @@ export const Dashboard = () => {
   const [selectedMonth, setSelectedMonth] = useState(
     new Date().toLocaleString("default", { month: "long" })
   );
+
+
 
   const getMonthlySale = async () => {
     try {
@@ -151,7 +135,6 @@ export const Dashboard = () => {
       console.error("Error fetching weekly data:", error);
     }
   };
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (chartData) {
@@ -188,12 +171,16 @@ export const Dashboard = () => {
       color: "hsl(var(--chart-3))",
     },
   };
+
   const years = getYears(2000, new Date().getFullYear());
+
+ 
+
   return (
     <>
       <div className="min-h-screen flex flex-col items-center bg-[#E8E8E8] p-4 relative">
+        
         <img src="logo512.png" className="h-28 md:h-40" alt="logo" />
-
         <div className="flex flex-col md:flex-row w-full md:w-[70%] gap-4  ">
           <button
             className="md:px-4 w-full  p-5 md:py-2 bg-[#929192] text-white  rounded-lg shadow transition"
@@ -293,7 +280,7 @@ export const Dashboard = () => {
             <ChartContainer
               config={chartConfig}
               style={{
-                width: data?.length ? data.length * 100 : "100%",
+                width: data?.length ? data.length * 110 : "100%",
                 minWidth: "100%",
               }}
               className="h-[100%]"
@@ -353,14 +340,6 @@ export const Dashboard = () => {
             </ChartContainer>
           </CardContent>
         </Card>
-        {/* 
-      <div className="flex absolute bottom-4 left-4  mt-4 ">
-        <IoMdExit
-          onClick={() => navigate(`/`)}
-          className="cursor-pointer rotate-180  text-2xl  hover:text-indigo-100 transition-all"
-        />
-        <h1 className="text-red-800 font-semibold">LogOut</h1>
-      </div> */}
       </div>
     </>
   );

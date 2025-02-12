@@ -5,8 +5,33 @@ import DatePicker from "react-multi-date-picker";
 import { ImCross } from "react-icons/im";
 import { ToastAction } from "./ui/toast";
 import { toast } from "../hooks/use-toast";
-
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuItem,
+} from "./ui/sidebar";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "./ui/sheet";
+import { Button } from "./ui/button";
 export const SalesComponent = () => {
+  const [currentTime, setCurrentTime] = useState({
+    date: new Date().toLocaleDateString(),
+  });
+  const [sheetModal, setSheetModal] = useState(false);
+  const [darftModal, setDarftModal] = useState(false);
+  const [darftData, setDarftData] = useState(null);
+  const [selectedItem, setSelectedItem] = useState();
   const [monthlySalesData, setMonthlySalesDate] = useState();
   const [daiySaleData, setDailySaleData] = useState();
   const [ViewMonthlyModal, setViewMonthlyModal] = useState();
@@ -31,7 +56,16 @@ export const SalesComponent = () => {
       console.error("Error fetching data:", error);
     }
   };
-
+  const handelDarft = async () => {
+    try {
+      const res = await fetch("http://localhost:5001/api/v1/sale/darft");
+      if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+      const data = await res.json();
+      setDarftData(data?.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
   const getDailyPurchaseData = async () => {
     try {
       const res = await fetch(
@@ -62,12 +96,15 @@ export const SalesComponent = () => {
     getAllDailySalesData();
     getDailyPurchaseData();
     getDailyExpenseData();
+    handelDarft();
   }, []);
 
-  console.log(selectedDates);
+  useEffect(() => {
+    console.log(expense, cashInHand, purchase);
+  }, []);
 
   const handelSubmitSale = async (e) => {
-    e.preventDefault();
+    e?.preventDefault();
     try {
       const res = await fetch("http://localhost:5001/api/v1/sale", {
         method: "POST",
@@ -85,6 +122,7 @@ export const SalesComponent = () => {
 
       if (res.status === 201) {
         getAllDailySalesData();
+        handelDarft()
         setCashInHand(" ");
         console.log("Data saved to MongoDB");
       } else if (res.status === 400) {
@@ -125,8 +163,150 @@ export const SalesComponent = () => {
       console.error("Error fetching data:", error);
     }
   };
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+  
+      console.log(`Current Time: ${hours}:${minutes}`);
+  
+      // Check if the time is exactly 11:59 PM
+      if (hours === 23 && minutes === 59) {
+        console.log("Auto-saving data to database at 11:59 PM...");
+        handelSubmitSale();
+      }
+    }, 60 * 1000); // Check every minute
+  
+    return () => clearInterval(interval);
+  }, [currentTime?.date, expense, cashInHand, purchase]);
+  
+  const updateSale = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch("http://localhost:5001/api/v1/sale/update", {
+        method: "PUT", // Use PUT or PATCH for updates
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          saleId: selectedItem._id,
+          updateData: selectedItem,
+        }),
+      });
+      const result = await response.json();
+      if (response.ok) {
+        console.log("Sale updated successfully:", result);
+        setDarftModal(false);
+        setSheetModal(false);
+        handelDarft();
+        getAllDailySalesData();
+        return result.data; // Return updated data
+      } else {
+        console.error("Failed to update sale:", result.message);
+        return null;
+      }
+    } catch (error) {
+      console.error("Error updating sale:", error);
+      return null;
+    }
+  };
   return (
     <div className="min-h-screen bg-[#E8E8E8] p-4 relative">
+      <Sheet open={sheetModal} onOpenChange={setSheetModal}>
+        <SheetTrigger className="absolute top-2 left-10">
+          <Button   className=" cursor-pointer md:px-6 p-2 md:py-3 text-[12px] md:text-base bg-[#4b4b49] text-white rounded-lg shadow-lg hover:scale-105 transform transition-all">
+            Darft Sales
+          </Button>
+          <div className="bg-black h-6 w-6 rounded-full absolute top-[-5px] right-[-10px]">
+            <h1 className="text-white">{darftData?.length}</h1>
+          </div>
+        </SheetTrigger>
+        <SheetContent side={"left"} className>
+          <SheetHeader>
+            <SheetTitle>Draft Sales</SheetTitle>
+          </SheetHeader>
+          <div className="mt-10">
+            {darftData?.map((item) => (
+              <div
+                className="p-2 border rounded-lg flex cursor-pointer"
+                onClick={() => {
+                  setDarftModal(true);
+                  setSelectedItem(item);
+                }}
+              >
+                <h1> {new Date(item.date).toLocaleDateString()}</h1>
+              </div>
+            ))}
+          </div>
+          {darftModal && (
+            <div className="fixed z-50 w-[100%] h-screen flex justify-center items-center top-0 right-0">
+              <div className="w-full max-w-[20rem] md:max-w-md rounded-2xl bg-white p-8 shadow-xl relative">
+                <h2 className="mb-6 text-center text-3xl font-bold text-gray-800">
+                  Edit Item
+                </h2>
+                <div
+                  className="absolute top-5 right-5 cursor-pointer"
+                  onClick={() => setDarftModal(false)}
+                >
+                  <ImCross />
+                </div>
+                {/* {error && <p className="mb-4 text-center text-red-500">{error}</p>} */}
+                <form>
+                  <div className="mb-4">
+                    <label className="mb-2 block text-gray-700">Expense</label>
+                    <input
+                      type="text"
+                      className="w-full rounded-lg border border-gray-300 p-3 focus:border-blue-500 focus:ring-blue-500"
+                      placeholder="Item Name"
+                      required
+                      value={selectedItem?.todayexpense}
+                      onChange={(e) =>
+                        setSelectedItem((prev) => ({
+                          ...prev,
+                          name: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                  <label className="mb-2 block text-gray-700">Purchase</label>
+                  <input
+                    type="number"
+                    className="w-full rounded-lg border border-gray-300 p-3 pr-10 focus:border-blue-500 focus:ring-blue-500"
+                    placeholder="price"
+                    value={selectedItem?.todaypurchase}
+                    required
+                  />
+                  <label className="mb-2 block text-gray-700">
+                    Cash In Hand
+                  </label>
+                  <input
+                    type="number"
+                    className="w-full rounded-lg border border-gray-300 p-3 pr-10 focus:border-blue-500 focus:ring-blue-500"
+                    placeholder="price"
+                    value={selectedItem?.cashinhand}
+                    required
+                    onChange={(e) =>
+                      setSelectedItem((prev) => ({
+                        ...prev,
+                        cashinhand: parseInt(e.target.value),
+                      }))
+                    }
+                  />
+
+                  <button
+                    type="submit"
+                    onClick={updateSale}
+                    className="mt-4 cursor-pointer w-full px-6 py-3 bg-[#4b4b49] text-white rounded-lg shadow-lg hover:scale-105 transform transition-all"
+                  >
+                    Update
+                  </button>
+                </form>
+              </div>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
       <div
         className="flex justify-between 
      "
@@ -148,7 +328,6 @@ export const SalesComponent = () => {
       <h1 className="text-center text-xl md:text-3xl font-semibold  mt-4 md:mt-5">
         {dayOfWeek}, {date.toLocaleDateString()}
       </h1>
-
       <form
         className=" space-y-2  md:space-y-6 mt-4 md:mt-8 shadow-lg p-4 md:p-6 bg-white bg-opacity-80 rounded-xl backdrop-blur-xl mx-auto max-w-3xl"
         onSubmit={handelSubmitSale}
@@ -347,72 +526,8 @@ export const SalesComponent = () => {
                     </tbody>
                   </table>
                 </div>
-                {/* <div className="flex gap-20">
-                    <button
-                      // onClick={handleDelete}
-                      className="mt-4 cursor-pointer w-full px-6 py-3 bg-[#4b4b49] text-white rounded-lg shadow-lg hover:scale-105 transform transition-all"
-                    >
-                      Delete
-                    </button>
-                    <button
-                      // onClick={() => setDeleteModal(false)}
-                      className="mt-4 cursor-pointer w-full px-6 py-3 bg-[#4b4b49] text-white rounded-lg shadow-lg hover:scale-105 transform transition-all"
-                    >
-                      Cancel
-                    </button>
-                  </div> */}
               </div>
             </div>
-            {/* <div className="z-30 w-[21.5rem] md:min-w-2xl  overflow-auto rounded-2xl bg-white p-4 md:p-8 shadow-xl relative">
-              <h2 className="mb-6 text-center text-3xl font-bold text-gray-800">
-                Montly Sale
-              </h2>
-              <div
-                className="absolute top-5 right-5 cursor-pointer"
-                onClick={() => setViewMonthlyModal(false)}
-              >
-                <ImCross />
-              </div>
-              <div className="overflow-x-auto max-h-[400px] md:max-h-[550px] shadow-xl">
-                <table className="w-full bg-white shadow-xl rounded-lg border-transparent ">
-                  <thead className="bg-gradient-to-r sticky top-0  from-indigo-500 to-purple-500 text-white">
-                    <tr>
-                      <th className="md:py-3 md:px-6 p-3 text-left">Date</th>
-                      <th className="md:py-3 md:px-6 p-3 text-left">Time</th>
-                      <th className="md:py-3 md:px-6 p-3 text-left">Day</th>
-                      <th className="md:py-3 md:px-6 p-3 text-left">Price</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data?.map((item) => {
-                      const dateObj = new Date(item.createdAt);
-                      return (
-                        <tr
-                          key={item.id}
-                          className="border-t h-[50px] hover:bg-indigo-50 transition-all"
-                        >
-                          <td className="text-base px-6 py-3">{item.name}</td>
-                          <td className="text-base px-6 py-3">
-                            {item.price} Rs
-                          </td>
-                          <td className="text-base px-6 py-3">
-                            {dateObj.toLocaleDateString()}
-                          </td>
-                          <td className="text-base px-6 py-3">
-                            {dateObj.toLocaleTimeString()}
-                          </td>
-                          <td className="text-base px-6 py-3">
-                            {dateObj.toLocaleDateString("en-US", {
-                              weekday: "long",
-                            })}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div> */}
           </div>
         </>
       )}

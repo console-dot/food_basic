@@ -66,6 +66,7 @@ export const PurchaseComponent = ({ SetPurchaseItems, purchaseItems }) => {
     return () => clearInterval(interval);
   }, [currentTime?.date, purchaseItems]);
 
+
   const saveToDatabase = async () => {
     console.log("Saving data:", purchaseItems);
     try {
