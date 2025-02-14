@@ -7,6 +7,7 @@ import { EditModal } from "./EditModal";
 import { DeleteModal } from "./DeleteModal";
 
 export const PurchaseComponent = ({ SetPurchaseItems, purchaseItems }) => {
+  const [isLoading, setIsLoading] = useState(false);
   const [editModal, setEditModal] = useState();
   const [deleteModal, setDeleteModal] = useState();
   const [selectedItem, setSelectedItem] = useState();
@@ -34,52 +35,55 @@ export const PurchaseComponent = ({ SetPurchaseItems, purchaseItems }) => {
       setName("");
       setPrice("");
     }
-  };  
-  
+  };
+
   useEffect(() => {
     console.log("Updated purchaseItems:", purchaseItems);
-  
+
     const interval = setInterval(() => {
       const now = new Date();
       const newDate = now.toLocaleDateString();
       const hours = now.getHours();
       const minutes = now.getMinutes();
-  
+
       console.log(`Current Time: ${hours}:${minutes}`);
-  
+
       // Auto-save at exactly 11:00 PM
       if (hours === 23 && minutes === 0) {
         console.log("It's 11:00 PM, auto-saving...");
         saveToDatabase();
       }
-  
+
       // Update date if changed
       if (newDate !== currentTime?.date && purchaseItems?.length > 0) {
         console.log("Date changed, updating currentTime...");
         setCurrentTime({ date: newDate });
-  
+
         console.log("Auto-saving data to database...");
         saveToDatabase();
       }
     }, 10 * 1000); // Check every 10 seconds
-  
+
     return () => clearInterval(interval);
   }, [currentTime?.date, purchaseItems]);
-
 
   const saveToDatabase = async () => {
     console.log("Saving data:", purchaseItems);
     try {
-      const res = await fetch("https://api-food-basic.vercel.app/api/v1/purchase", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ items: purchaseItems }),
-      });
+      const res = await fetch(
+        "https://api-food-basic.vercel.app/api/v1/purchase",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ items: purchaseItems }),
+        }
+      );
       console.log(res);
       if (res?.status === 201) {
         SetPurchaseItems([]);
+        setIsLoading(false);
       }
       console.log("Data saved to MongoDB");
     } catch (error) {
@@ -89,9 +93,7 @@ export const PurchaseComponent = ({ SetPurchaseItems, purchaseItems }) => {
 
   return (
     <div className="min-h-screen bg-[#E8E8E8] p-4 relative">
-      <div
-        className="flex justify-between items-center"
-      >
+      <div className="flex justify-between items-center">
         <ArrowLeft
           onClick={() => navigate(`/dashboard`)}
           className="cursor-pointer text-2xl hover:text-indigo-100 transition-all"
@@ -155,7 +157,9 @@ export const PurchaseComponent = ({ SetPurchaseItems, purchaseItems }) => {
                   className="border-t h-[50px] hover:bg-indigo-50 transition-all"
                 >
                   <td className="text-base md:py-3 md:px-6 p-3">{item.name}</td>
-                  <td className="text-base md:py-3 md:px-6 p-3">{item.price} Rs</td>
+                  <td className="text-base md:py-3 md:px-6 p-3">
+                    {item.price} Rs
+                  </td>
                   <td className="text-base md:py-3 md:px-6 p-3">{item.date}</td>
                   <td className="md:py-3 md:px-6 p-3 flex justify-center gap-4">
                     <BiEdit
@@ -180,8 +184,12 @@ export const PurchaseComponent = ({ SetPurchaseItems, purchaseItems }) => {
           {purchaseItems?.length > 0 && (
             <div className="absolute  bottom-[-60px] right-0">
               <button
-                className="mt-4 px-6 py-3 bg-[#4b4b49] text-white rounded-lg shadow-lg hover:scale-105 transform transition-all"
-                onClick={() => saveToDatabase()}
+                disabled={isLoading}
+                className={` mt-4 px-6 py-3 bg-[#4b4b49] text-white rounded-lg shadow-lg hover:scale-105 transform transition-all`}
+                onClick={() => {
+                  saveToDatabase();
+                  setIsLoading(true);
+                }}
               >
                 Save
               </button>
