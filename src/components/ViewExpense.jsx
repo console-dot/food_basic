@@ -17,7 +17,7 @@ export const ViewExpense = () => {
   const getData = async () => {
     try {
       const res = await fetch(
-        "http://localhost:5001/api/v1/expense/daily-all-expense"
+        "https://api-food-basic.vercel.app/api/v1/expense/daily-all-expense"
       );
       if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
       const data = await res.json();
@@ -53,7 +53,7 @@ export const ViewExpense = () => {
   const handelView = async (dateObj) => {
     try {
       const res = await fetch(
-        `http://localhost:5001/api/v1/expense/daily-expense/${dateObj}`
+        `https://api-food-basic.vercel.app/api/v1/expense/daily-expense/${dateObj}`
       );
       if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
       const data = await res.json();

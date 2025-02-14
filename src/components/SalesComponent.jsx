@@ -46,7 +46,7 @@ export const SalesComponent = () => {
   const getDailyExpenseData = async () => {
     try {
       const res = await fetch(
-        "http://localhost:5001/api/v1/expense/daily-expense"
+        "https://api-food-basic.vercel.app/api/v1/expense/daily-expense"
       );
       if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
       const data = await res.json();
@@ -58,7 +58,7 @@ export const SalesComponent = () => {
   };
   const handelDarft = async () => {
     try {
-      const res = await fetch("http://localhost:5001/api/v1/sale/darft");
+      const res = await fetch("https://api-food-basic.vercel.app/api/v1/sale/darft");
       if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
       const data = await res.json();
       setDarftData(data?.data);
@@ -69,7 +69,7 @@ export const SalesComponent = () => {
   const getDailyPurchaseData = async () => {
     try {
       const res = await fetch(
-        "http://localhost:5001/api/v1/purchase/daily-purchase"
+        "https://api-food-basic.vercel.app/api/v1/purchase/daily-purchase"
       );
       if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
       const data = await res.json();
@@ -81,7 +81,7 @@ export const SalesComponent = () => {
   };
   const getAllDailySalesData = async () => {
     try {
-      const res = await fetch("http://localhost:5001/api/v1/sale/all");
+      const res = await fetch("https://api-food-basic.vercel.app/api/v1/sale/all");
       if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
       const data = await res.json();
       setDailySaleData(data.data);
@@ -106,7 +106,7 @@ export const SalesComponent = () => {
   const handelSubmitSale = async (e) => {
     e?.preventDefault();
     try {
-      const res = await fetch("http://localhost:5001/api/v1/sale", {
+      const res = await fetch("https://api-food-basic.vercel.app/api/v1/sale", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -154,7 +154,7 @@ export const SalesComponent = () => {
 
   const getMonthlySale = async () => {
     try {
-      const res = await fetch("http://localhost:5001/api/v1/sale/monthly-sale");
+      const res = await fetch("https://api-food-basic.vercel.app/api/v1/sale/monthly-sale");
       if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
       const data = await res.json();
       setMonthlySalesDate(data?.data || []);
@@ -184,7 +184,7 @@ export const SalesComponent = () => {
   const updateSale = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:5001/api/v1/sale/update", {
+      const response = await fetch("https://api-food-basic.vercel.app/api/v1/sale/update", {
         method: "PUT", // Use PUT or PATCH for updates
         headers: {
           "Content-Type": "application/json",

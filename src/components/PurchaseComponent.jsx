@@ -70,7 +70,7 @@ export const PurchaseComponent = ({ SetPurchaseItems, purchaseItems }) => {
   const saveToDatabase = async () => {
     console.log("Saving data:", purchaseItems);
     try {
-      const res = await fetch("http://localhost:5001/api/v1/purchase", {
+      const res = await fetch("https://api-food-basic.vercel.app/api/v1/purchase", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
