@@ -7,6 +7,7 @@ import { EditModal } from "./EditModal";
 import { DeleteModal } from "./DeleteModal";
 
 export const ExpenseComponent = ({ SetExpenseItems, expenseItems }) => {
+    const [isLoading, setIsLoading] = useState(false);
   const [editModal, setEditModal] = useState();
   const [deleteModal, setDeleteModal] = useState();
   const [selectedItem, setSelectedItem] = useState();
@@ -181,9 +182,13 @@ export const ExpenseComponent = ({ SetExpenseItems, expenseItems }) => {
           </table>
           {expenseItems?.length > 0 && (
             <div className="absolute  bottom-[-60px] right-0">
-              <button
-                className="mt-4 px-6 py-3 bg-[#4b4b49] text-white rounded-lg shadow-lg hover:scale-105 transform transition-all"
-                onClick={() => saveToDatabase()}
+             <button
+                disabled={isLoading}
+                className={` mt-4 px-6 py-3 bg-[#4b4b49] text-white rounded-lg shadow-lg hover:scale-105 transform transition-all`}
+                onClick={() => {
+                  saveToDatabase();
+                  setIsLoading(true);
+                }}
               >
                 Save
               </button>
