@@ -72,7 +72,7 @@ export const Dashboard = () => {
 
   const getMonthlySale = async () => {
     try {
-      const res = await fetch("http://localhost:5001/api/v1/sale/yearly-sale");
+      const res = await fetch("https://api-food-basic.vercel.app/api/v1/sale/yearly-sale");
       if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
       const data = await res.json();
       setChartData(data?.data || []);
@@ -124,7 +124,7 @@ export const Dashboard = () => {
   const fetchWeeklySales = async (startDate, endDate) => {
     try {
       const res = await fetch(
-        `http://localhost:5001/api/v1/sale/weekly?startDate=${startDate}&endDate=${endDate}`
+        `https://api-food-basic.vercel.app/api/v1/sale/weekly?startDate=${startDate}&endDate=${endDate}`
       );
       if (!res.ok) throw new Error("Failed to fetch data");
 
