@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { EditModal } from "./EditModal";
 import { DeleteModal } from "./DeleteModal";
+import { toast } from "../hooks/use-toast";
 
 export const PurchaseComponent = ({ SetPurchaseItems, purchaseItems }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -83,6 +84,10 @@ export const PurchaseComponent = ({ SetPurchaseItems, purchaseItems }) => {
       console.log(res);
       if (res?.status === 201) {
         SetPurchaseItems([]);
+        toast({
+          variant: "success",
+          title: "Add purchase",
+        });
         setIsLoading(false);
       }
       console.log("Data saved to MongoDB");
@@ -185,13 +190,15 @@ export const PurchaseComponent = ({ SetPurchaseItems, purchaseItems }) => {
             <div className="absolute  bottom-[-60px] right-0">
               <button
                 disabled={isLoading}
-                className={` mt-4 px-6 py-3 bg-[#4b4b49] text-white rounded-lg shadow-lg hover:scale-105 transform transition-all`}
+                className={` mt-4 ${
+                  isLoading && "bg-[#919190]"
+                } px-6 py-3 bg-[#4b4b49] text-white rounded-lg shadow-lg hover:scale-105 transform transition-all`}
                 onClick={() => {
                   saveToDatabase();
                   setIsLoading(true);
                 }}
               >
-                Save
+                {isLoading ? "Saving..." : "Save"}
               </button>
             </div>
           )}

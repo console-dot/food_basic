@@ -58,7 +58,9 @@ export const SalesComponent = () => {
   };
   const handelDarft = async () => {
     try {
-      const res = await fetch("https://api-food-basic.vercel.app/api/v1/sale/darft");
+      const res = await fetch(
+        "https://api-food-basic.vercel.app/api/v1/sale/darft"
+      );
       if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
       const data = await res.json();
       setDarftData(data?.data);
@@ -81,7 +83,9 @@ export const SalesComponent = () => {
   };
   const getAllDailySalesData = async () => {
     try {
-      const res = await fetch("https://api-food-basic.vercel.app/api/v1/sale/all");
+      const res = await fetch(
+        "https://api-food-basic.vercel.app/api/v1/sale/all"
+      );
       if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
       const data = await res.json();
       setDailySaleData(data.data);
@@ -122,7 +126,7 @@ export const SalesComponent = () => {
 
       if (res.status === 201) {
         getAllDailySalesData();
-        handelDarft()
+        handelDarft();
         setCashInHand(" ");
         console.log("Data saved to MongoDB");
       } else if (res.status === 400) {
@@ -154,7 +158,9 @@ export const SalesComponent = () => {
 
   const getMonthlySale = async () => {
     try {
-      const res = await fetch("https://api-food-basic.vercel.app/api/v1/sale/monthly-sale");
+      const res = await fetch(
+        "https://api-food-basic.vercel.app/api/v1/sale/monthly-sale"
+      );
       if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
       const data = await res.json();
       setMonthlySalesDate(data?.data || []);
@@ -168,32 +174,35 @@ export const SalesComponent = () => {
       const now = new Date();
       const hours = now.getHours();
       const minutes = now.getMinutes();
-  
+
       console.log(`Current Time: ${hours}:${minutes}`);
-  
+
       // Check if the time is exactly 11:59 PM
       if (hours === 23 && minutes === 59) {
         console.log("Auto-saving data to database at 11:59 PM...");
         handelSubmitSale();
       }
     }, 60 * 1000); // Check every minute
-  
+
     return () => clearInterval(interval);
   }, [currentTime?.date, expense, cashInHand, purchase]);
-  
+
   const updateSale = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("https://api-food-basic.vercel.app/api/v1/sale/update", {
-        method: "PUT", // Use PUT or PATCH for updates
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          saleId: selectedItem._id,
-          updateData: selectedItem,
-        }),
-      });
+      const response = await fetch(
+        "https://api-food-basic.vercel.app/api/v1/sale/update",
+        {
+          method: "PUT", // Use PUT or PATCH for updates
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            saleId: selectedItem._id,
+            updateData: selectedItem,
+          }),
+        }
+      );
       const result = await response.json();
       if (response.ok) {
         console.log("Sale updated successfully:", result);
@@ -215,7 +224,7 @@ export const SalesComponent = () => {
     <div className="min-h-screen bg-[#E8E8E8] p-4 relative">
       <Sheet open={sheetModal} onOpenChange={setSheetModal}>
         <SheetTrigger className="absolute top-2 left-10">
-          <Button   className=" cursor-pointer md:px-6 p-2 md:py-3 text-[12px] md:text-base bg-[#4b4b49] text-white rounded-lg shadow-lg hover:scale-105 transform transition-all">
+          <Button className=" cursor-pointer md:px-6 p-2 md:py-3 text-[12px] md:text-base bg-[#4b4b49] text-white rounded-lg shadow-lg hover:scale-105 transform transition-all">
             Darft Sales
           </Button>
           <div className="bg-black h-6 w-6 rounded-full absolute top-[-5px] right-[-10px]">
@@ -343,10 +352,11 @@ export const SalesComponent = () => {
               Today's Purchase
             </label>
             <input
+              disabled
               type="number"
               id="purchase"
               value={purchase}
-              onChange={(e) => setPurchase(Number(e.target.value))}
+              // onChange={(e) => setPurchase(Number(e.target.value))}
               placeholder="0.00"
               required
               className="w-full px-2 py-1 md:px-4 md:py-2.5  border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
@@ -365,10 +375,11 @@ export const SalesComponent = () => {
               Today's Expense
             </label>
             <input
+              disabled
               type="number"
               id="expense"
               value={expense}
-              onChange={(e) => setExpense(Number(e.target.value))}
+              // onChange={(e) => setExpense(Number(e.target.value))}
               placeholder="0.00"
               required
               className="w-full px-2 py-1 md:px-4 md:py-2.5  border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
