@@ -5,9 +5,10 @@ import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { EditModal } from "./EditModal";
 import { DeleteModal } from "./DeleteModal";
+import { toast } from "../hooks/use-toast";
 
 export const ExpenseComponent = ({ SetExpenseItems, expenseItems }) => {
-    const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [editModal, setEditModal] = useState();
   const [deleteModal, setDeleteModal] = useState();
   const [selectedItem, setSelectedItem] = useState();
@@ -40,48 +41,54 @@ export const ExpenseComponent = ({ SetExpenseItems, expenseItems }) => {
 
   useEffect(() => {
     console.log("Updated expenseItems:", expenseItems);
-  
+
     const interval = setInterval(() => {
       const now = new Date();
       const newDate = now.toLocaleDateString();
       const hours = now.getHours();
       const minutes = now.getMinutes();
-  
+
       console.log(`Current Time: ${hours}:${minutes}`);
-  
+
       // Auto-save at exactly 11:00 PM (23:00)
       if (hours === 23 && minutes === 0) {
         console.log("It's 11:00 PM, auto-saving...");
         saveToDatabase();
       }
-  
+
       // Auto-save when date changes (after midnight)
       if (newDate !== currentTime?.date && expenseItems?.length > 0) {
         console.log("Date changed, updating currentTime...");
         setCurrentTime({ date: newDate });
-  
+
         console.log("Auto-saving data to database...");
         saveToDatabase();
       }
     }, 10 * 1000); // Check every 10 seconds
-  
+
     return () => clearInterval(interval);
   }, [currentTime?.date, expenseItems]);
-  
 
   const saveToDatabase = async () => {
     console.log("Saving data:", expenseItems);
     try {
-      const res = await fetch("https://api-food-basic.vercel.app/api/v1/expense", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ items: expenseItems }),
-      });
+      const res = await fetch(
+        "https://api-food-basic.vercel.app/api/v1/expense",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ items: expenseItems }),
+        }
+      );
       console.log(res);
       if (res?.status === 201) {
         SetExpenseItems([]);
+        toast({
+          variant: "success",
+          title: "Add purchase",
+        });
       }
       console.log("Data saved to MongoDB");
     } catch (error) {
@@ -182,15 +189,17 @@ export const ExpenseComponent = ({ SetExpenseItems, expenseItems }) => {
           </table>
           {expenseItems?.length > 0 && (
             <div className="absolute  bottom-[-60px] right-0">
-             <button
+              <button
                 disabled={isLoading}
-                className={` mt-4 px-6 py-3 bg-[#4b4b49] text-white rounded-lg shadow-lg hover:scale-105 transform transition-all`}
+                className={` mt-4 ${
+                  isLoading && "bg-[#919190]"
+                } px-6 py-3 bg-[#4b4b49] text-white rounded-lg shadow-lg hover:scale-105 transform transition-all`}
                 onClick={() => {
                   saveToDatabase();
                   setIsLoading(true);
                 }}
               >
-                Save
+                {isLoading ? "Saving..." : "Save"}
               </button>
             </div>
           )}
